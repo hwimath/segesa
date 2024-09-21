@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>세계사 퀴즈게임</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .quiz-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .options {
+            list-style-type: none;
+            padding: 0;
+        }
+        .options li {
+            margin-bottom: 10px;
+        }
+        .result {
+            display: none;
+            padding: 10px;
+            margin-top: 20px;
+            text-align: center;
+            border-radius: 5px;
+        }
+        .result.correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .result.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>세계사 퀴즈</h1>
+    <div class="question-container">
+        <p id="question" class="question"></p>
+        <ul id="options" class="options">
+            <li><button class="option" data-answer="1"></button></li>
+            <li><button class="option" data-answer="2"></button></li>
+            <li><button class="option" data-answer="3"></button></li>
+            <li><button class="option" data-answer="4"></button></li>
+        </ul>
+    </div>
+    <div id="result" class="result"></div>
+    <button id="next">다음 문제</button>
+</div>
+
+<script>
+    window.onerror = function (msg, url, lineNo, columnNo, error) {
+        alert('Error: ' + msg + '\nScript: ' + url + '\nLine: ' + lineNo + '\nColumn: ' + columnNo + '\nStackTrace: ' +  error);
+        return false;
+    };
+
+    const quizData = [
+        {question: "빈 회의는 어느 인물의 주도로 열렸나요?", options: ["메테르니히", "나폴레옹", "프란츠 페르디난트", "비스마르크"], correct: 1},
+        {question: "빈 회의에서 강조된 정치 원칙은?", options: ["민주주의", "정통주의", "자유주의", "공산주의"], correct: 2},
+        {question: "빈 체제를 유지하기 위해 결성된 동맹은?", options: ["북대서양조약기구", "신성 동맹과 4국 동맹", "러시아 동맹", "유럽 연합"], correct: 2},
+        {question: "프랑스 혁명 이전의 상태로 되돌리려는 회의는?", options: ["파리 회의", "빈 회의", "베를린 회의", "베르사유 회의"], correct: 2},
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let incorrectQuestions = [];
+    let isReview = false;
+
+    const questionElement = document.getElementById('question');
+    const optionsElements = document.querySelectorAll('.option');
+    const resultElement = document.getElementById('result');
+    const nextButton = document.getElementById('next');
+
+    function loadQuestion() {
+        const currentQuiz = quizData[currentQuestion];
+        questionElement.textContent = currentQuiz.question;
+        optionsElements.forEach((option, index) => {
+            option.textContent = currentQuiz.options[index];
+            option.ontouchstart = (e) => { e.preventDefault(); checkAnswer(index + 1, currentQuiz.correct); };
+            option.onclick = () => checkAnswer(index + 1, currentQuiz.correct);
+        });
+    }
+
+    function checkAnswer(selected, correct) {
+        if (selected === correct) {
+            resultElement.textContent = "정답입니다!";
+            resultElement.className = "result correct";
+            score++;
+        } else {
+            resultElement.textContent = "오답입니다.";
+            resultElement.className = "result incorrect";
+            incorrectQuestions.push(currentQuestion);
+        }
+        resultElement.style.display = "block";
+    }
+
+    nextButton.ontouchstart = (e) => { e.preventDefault(); nextQuestion(); };
+    nextButton.onclick = () => nextQuestion();
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            resultElement.style.display = "none";
+            loadQuestion();
+        } else if (!isReview && incorrectQuestions.length > 0) {
+            quizData = incorrectQuestions.map(i => quizData[i]);
+            incorrectQuestions = [];
+            currentQuestion = 0;
+            isReview = true;
+            loadQuestion();
+        } else {
+            questionElement.textContent = `퀴즈 완료! 총 점수: ${score}/${quizData.length}`;
+            resultElement.style.display = "none";
+            nextButton.style.display = "none";
+        }
+    }
+
+    // 첫 질문 로드
+    loadQuestion();
+</script>
+
+</body>
+</html>
